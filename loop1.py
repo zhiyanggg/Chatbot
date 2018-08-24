@@ -6,7 +6,7 @@ chinesefood = ("char kway teow", "biryani", "oyster omelette", "chicken rice", "
 
 drinks = ("milk tea", "lao hor", "soy bean", "coffee", "kopi", "beer gao")
 sides = ("fries", "mash potato", "toast cube", "salad", "soup", "spaghetti")
-numbers = open("C:/Users/Asus-Laptop/Desktop/numbers.txt", "r")
+numbers = open("C:/Users/Asus-Laptop/Desktop/numbers without word forms.txt", "r")
 numbers = numbers.read()
 
 trained_data = []
@@ -40,15 +40,15 @@ def fooddatatraining():
                              (8, 8+len(x), 'FOOD')]
             }),
 
-            ("2 satay 4 large biryani 5 large chicken rice", {
+            ("2 char kway teow 4 large biryani 5 large chicken rice", {
                 'entities': [(0, 1, 'QUANTITY'),
-                             (2, 7, 'FOOD'),
-                             (8, 9, 'QUANTITY'),
-                             (10, 15, 'SIZE'),
-                             (16, 23, 'FOOD'),
-                             (24, 25, 'QUANTITY'),
-                             (26, 31, 'SIZE'),
-                             (32, 44, 'FOOD')]
+                             (2, 16, 'FOOD'),
+                             (9, 18, 'QUANTITY'),
+                             (19, 24, 'SIZE'),
+                             (25, 32, 'FOOD'),
+                             (33, 34, 'QUANTITY'),
+                             (35, 40, 'SIZE'),
+                             (41, 53, 'FOOD')]
             }),
 
             (x + " is a cuisine", {
@@ -112,12 +112,13 @@ def drinksdatatraining():
                              ( 41,  49, 'DRINKS')]
             }),
 
-            ("one " + x + " 6 large spaghetti chicken chop", {
-                'entities': [(0, 3, 'QUANTITY'),
-                             (4,  4 + len(x), 'DRINKS'),
-                             (4+len(x)+1, len(x)+6, 'QUANTITY'),
-                             (4+len(x)+3, 4+len(x)+8, 'SIZE'),
-                             (4+len(x)+9, 4+len(x)+31, 'FOOD')]
+            ("1 small " + x + " 6 large spaghetti chicken chop", {
+                'entities': [(0, 1, 'QUANTITY'),
+                             (2, 7, 'SIZE'),
+                             (8,  8 + len(x), 'DRINKS'),
+                             (8+len(x)+1, 8+len(x)+2, 'QUANTITY'),
+                             (8+len(x)+3, 8+len(x)+8, 'SIZE'),
+                             (8+len(x)+9, 8+len(x)+31, 'FOOD')]
             }),
 
             (x + " taste good", {

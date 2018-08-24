@@ -37,7 +37,7 @@ flask
 
 
 ## Building the model
-After isntalling the libraries above, you will need to change the output directory(variable name is, "output_dir") in the complexquery.py script to your own directory which you wish to save the trained spacy model.
+After installing the libraries above, you will need to change the output directory(variable name is, "output_dir") in the complexquery.py script to your own directory which you wish to save the trained spacy model.
 You will need to run the main function in complexquery.py. Do take note of putting all the downloaded files within the same directory so as to facilitate the importing of files. 
 Once you run the function, just sit back and relax as the building of model takes a few hours to train. 
 

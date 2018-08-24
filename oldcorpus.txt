@@ -1,0 +1,68 @@
+char, 20423792 
+kway, 20423792 
+teow, 20423792 
+biryani, 20423792 
+oyster omelette, 20423792 
+chicken rice, 20423792 
+pasta, 20423792 
+satay, 20423792 
+hokkien prawn mee, 20423792 
+fried carrot cake, 20423792 
+hokkien char mee, 20423792 
+curry fish head, 20423792 
+noodle, 20423792 
+spaghetti with sausage, 20423792 
+beef, 20423792 
+rojak, 20423792 
+aglio olio chicken cutlet, 20423792 
+roti prata, 20423792 
+spaghetti with chicken chop, 20423792 
+aglio olio chicken chop, 20423792 
+bee hoon, 20423792 
+spaghetti with chicken cutlet, 20423792 
+bun bo hue, 20423792 
+spaghetti with ham and mushroom, 20423792 
+pho, 20423792 
+mee siam, 20423792 
+dim sum, 20423792 
+wanton mee, 20423792 
+pho bo, 20423792 
+laksa, 20423792 
+chicken burger, 20423792 
+bak chor mee, 20423792 
+crabs, 20423792 
+nasi lemak, 20423792 
+fish burger, 20423792 
+bak kut teh, 20423792 
+fried hokkien mee, 20423792 
+fish n chips, 20423792 
+milk tea, 20423792 
+lao hor, 20423792 
+soy bean, 20423792 
+coffee, 20423792 
+kopi, 20423792 
+beer gao, 20423792 
+fries, 20423792 
+mash potato, 20423792 
+toast cubes, 20423792 
+salad, 20423792 
+soup, 20423792 
+spaghetti, 20423792
+large, 20423792
+regular, 20423792
+small, 20423792
+tiny, 20423792
+enormous, 20423792
+medium, 20423792
+extra-large, 20423792
+cubes,1887321
+tea, 20423792
+potato, 20423792
+gao, 20423792
+cups,8935485
+sticks,6393950
+plates,14210099
+order,336631187
+portion,23356612
+quantity,38123233
+quantities,7308855

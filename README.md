@@ -1,10 +1,13 @@
 # NTU Foodchatbot
 
-One Paragraph of project description goes here
+Foodchatbot for NTU NorthSpine Canteen A
 
 ## Getting Started
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
+These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system. Do ensure you navigate to the "for download" branch before you start downloading the files.
+
+
+
 
 ### Prerequisites
 You will need to create a account in Dialogflow and Facebook so that you can test the script at the end. 

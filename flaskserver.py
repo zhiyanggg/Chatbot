@@ -6,16 +6,14 @@ from flask import Flask
 from flask import request
 from flask import make_response
 from complexquery import *
-from sqlalchemy import *
-from sqlalchemy import create_engine
-from sqlalchemy import *
-from sqlalchemy.orm import sessionmaker
-import pprint
-import mysql
 from loop1 import food
+import re
+
+
 # Flask app should start in global layout
 app = Flask(__name__)
 
+speech = ""
 
 @app.route('/', methods=['POST'])
 def webhook():
@@ -33,6 +31,7 @@ def webhook():
     return r
 
 def makeWebhookResult(req):
+    global speech
     intentofDF = req.get("queryResult").get("intent").get("displayName")
     if intentofDF == "Complexquery":
         speech = complexq()
@@ -64,48 +63,70 @@ def makeWebhookResult(req):
                     }
                 ],
             }
-        # print("type: ", type(json.dumps(result)))
         return result
 
     if intentofDF == "Complexquery - yes":
-        __DEBUG__ = True
-        # engine = create_engine('mysql+mysqlconnector://zy:zy123456@localhost/canteena_fnb?charset=utf8',
-        #                        encoding='utf8')
-        engine = create_engine('mysql+mysqlconnector://zy:zy123456@localhost/canteena_fnb', pool_recycle=3600)
-        print("logon to mysql")
-        Session = sessionmaker(bind=engine)
-        s = Session()
-        print("session created")
-        retStr = "Total price: S$"
-        totalprice = 0.0
+        processedorder = totalprice("C:/Users/Asus-Laptop/Desktop", speech)
+        result = {
+            "fulfillmentText": processedorder,
+            # "source": "facebook",
+            "fulfillmentMessages": [
+                {
+                    "platform": "FACEBOOK",
+                    "text": {
+                        "text": [
+                            "The total price for your order is $", processedorder
+                        ]
+                    }
+                }
+            ],
+        }
+        return result
 
-        for idx, item in enumerate(food):
-            query = s.query(Food.fprice).filter(Food.fname.in_([foods[0]]))
-            result = query.first()
-            unit_price = 3.0
-            if result:
-                unit_price = float(result[0])
-                if (__DEBUG__):
-                    print("Checking price of your order")
-                    pprint.pprint(result[0])
+    if intentofDF == "list_drink":
+        result = {
+            "fulfillmentMessages": [
+                {
+                    "platform": "FACEBOOK",
+                    "text": {
+                        "text": [
+                            "We have the following sides: ", drinkslist()
+                        ]
+                    }
+                }
+            ],
+        }
+        return result
 
-            noItems = 1.0
-            if (idx < len(units)):
-                numberStr = ""
-                if (units[idx] != None):
-                    numberStr = str(units[idx]).replace("\"", "")
-                noItems = float(numberStr)
-            totalprice = totalprice + unit_price * noItems
+    if intentofDF == "list_side_dishes":
+        result = {
+            "fulfillmentMessages": [
+                {
+                    "platform": "FACEBOOK",
+                    "text": {
+                        "text": [
+                            "We have the following sides: ", sideslist()
+                        ]
+                    }
+                }
+            ],
+        }
+        return result
 
-        if (__DEBUG__):
-            print("Total price: " + str(totalprice))
-
-        result1 = retStr + str(totalprice)
-        return result1
-
-
-
-
+    if intentofDF == "list_food_by_cuisine":
+        result = {
+            "fulfillmentMessages": [
+                {
+                    "platform": "FACEBOOK",
+                    "text": {
+                        "text": [
+                            "We have the following food: ", foodlist()
+                        ]
+                    }
+                }
+            ],
+        }
+        return result
 
 
 if __name__ == '__main__':

@@ -14,20 +14,26 @@ from spacy_api import api
 from spacy_api import Client
 import json
 from flask import request
+import mysql
+import mysql.connector
 
+config = {
+    'user': 'root',
+    'password': '',
+    'host': 'localhost',
+    'database': 'chatbot',
+    'raise_on_warnings': True,
+}
 
 cachedStopWords = open("C:/Users/Asus-Laptop/Desktop/stopwords.txt", "r")
 cachedStopWords = cachedStopWords.read()
 numbers = {"zero":0, "one":1, "two":2, "three":3, "four":4, "five":5, "six":6, "seven":7, "eight":8, "nine":9}
-foodorder = []
-
-class Orderitem():
-
-    def __init__(self, quantity=None, name=None):
-        self.size = None
-
-        if quantity == "0" or quantity == "zero" or quantity == "Zero":
-            print("You need to input a quantity for the item " + name)
+foodordered = []
+drinksordered = []
+sidesordered = []
+cnx = mysql.connector.connect(**config)
+print("logon to mysql")
+cursor = cnx.cursor()
 
 
 def cleantext(s):   # remove stop words, multiple spaces, special characters and punctuations
@@ -72,7 +78,7 @@ def cleantext(s):   # remove stop words, multiple spaces, special characters and
     s = newstring
     # print(newstring)# after attempt
     s = ' '.join([word for word in s.split() if word not in cachedStopWords])
-    print(s)# after removing stopwords
+    # print(s)# after removing stopwords
     return s
 
 # test_text2 = 'i want 3 sticks of satay, 4 fries and 3 cups of coffee'
@@ -202,8 +208,10 @@ def complexq(model=None, new_model_name='food', output_dir="C:/Users/Asus-Laptop
     print(test_text2)
     doc4 = nlp(test_text2)
     result = "You wish to order "
+    quantity = []
     count = 0
     totalcount = len(doc4.ents)
+    global foodordered, drinksordered, sidesordered
     for ent in doc4.ents:
         if count == totalcount-3 and ent.label_ == "QUANTITY":
             result += " and "
@@ -211,21 +219,137 @@ def complexq(model=None, new_model_name='food', output_dir="C:/Users/Asus-Laptop
         if count == totalcount - 2 and ent.label_ == "QUANTITY":
             result += " and "
 
-        if (ent.label_) != "FOOD":
+        if (ent.label_) == "QUANTITY":
             result += ent.text
+            quantity.clear()
+            quantity.append(ent.text)
             result += " "
             count = count + 1
+            continue
 
-        else:
+        if (ent.label_) == "FOOD":
+            foodordered.append(quantity[0])
+            foodordered.append(ent.text)
             result += ent.text
-            result += ", "
+            # result += ", "
             count = count + 1
+            continue
+
+        if (ent.label_) == "DRINKS":
+            drinksordered.append(quantity[0])
+            drinksordered.append(ent.text)
+            result += ent.text
+            # result += ", "
+            count = count + 1
+            continue
+
+        if (ent.label_) == "SIDES":
+            sidesordered.append(quantity[0])
+            sidesordered.append(ent.text)
+            result += ent.text
+            # result += ", "
+            count = count + 1
+            continue
+
+        # else:
+        #     result += ent.text
+        #     result += ", "
+        #     count = count + 1
+        #     continue
 
 
     print('Entities', [(ent.text, ent.label_) for ent in doc4.ents])
     # result = (spacy_client.testfunc(doc4))
     return result
 
+def totalprice(output_dir,speech):
+    total = float(0)
+    for i in range(len(sidesordered)):
+        # print("this is sides ordered", sidesordered[i])
+        sqlquery = ""
+
+        if len(sidesordered) == 0:
+            break
+
+        if sidesordered[i].isnumeric():
+            continue
+
+        else:
+            sqlquery += sidesordered[i]
+            query = "SELECT sprice FROM sides WHERE sname = %s"
+            cursor.execute(query, (sqlquery,))
+            sidesprice = float(sidesordered[i-1]) * cursor.fetchone()[0]
+            total += sidesprice
+
+
+
+    for i in range(len(drinksordered)):
+        # print("this is drinks ordered", drinksordered[i])
+        sqlquery = ""
+
+        if len(drinksordered) == 0:
+            break
+
+        if drinksordered[i].isnumeric():
+            continue
+
+        else:
+            sqlquery += drinksordered[i]
+            query = "SELECT dprice FROM drinks WHERE dname = %s"
+            cursor.execute(query, (sqlquery,))
+            drinksprice = float(drinksordered[i-1]) * cursor.fetchone()[0]
+            total += drinksprice
+
+    for i in range(len(foodordered)):
+        # print("this is food ordered", foodordered[i])
+        sqlquery = ""
+
+        if len(foodordered) == 0:
+            break
+
+        if foodordered[i].isnumeric():
+            continue
+
+        else:
+            sqlquery += foodordered[i]
+            query = "SELECT fprice FROM food WHERE fname = %s"
+            cursor.execute(query, (sqlquery,))
+            foodprice = float(foodordered[i-1]) * cursor.fetchone()[0]
+            total += foodprice
+
+    print("this is the total price, ", total)
+    return total
+
+
+def foodlist():
+    foodlist = ""
+    query = "SELECT fname FROM food"
+    cursor.execute(query)
+    for row in cursor:
+        foodlist += "\\n"
+        foodlist += row[0]
+
+    return foodlist
+
+def sideslist():
+    sideslist = ""
+    query = "SELECT sname FROM sides"
+    cursor.execute(query)
+    for row in cursor:
+        sideslist += "\\n"
+        sideslist += row[0]
+
+    return sideslist
+
+def drinkslist():
+    drinkslist = ""
+    query = "SELECT dname FROM drinks"
+    cursor.execute(query)
+    for row in cursor:
+        drinkslist += "\\n"
+        drinkslist += row[0]
+
+    return drinkslist
 
 # if __name__ == '__main__':
 #     plac.call(main)

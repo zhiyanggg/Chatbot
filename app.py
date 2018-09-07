@@ -1,137 +1,97 @@
-import urllib
-import json
 import os
+import sys
+import json
 
-from flask import Flask
-from flask import request
-from flask import make_response
-from complexquery import *
-from loop1 import food
-import re
+import requests
+from flask import Flask, request
 
-
-# Flask app should start in global layout
 app = Flask(__name__)
 
-speech = ""
+
+@app.route('/', methods=['GET'])
+def verify():
+    # when the endpoint is registered as a webhook, it must
+    # return the 'hub.challenge' value in the query arguments
+    if request.args.get("hub.mode") == "subscribe" and request.args.get("hub.challenge"):
+        if not request.args.get("hub.verify_token") == os.environ["VERIFY_TOKEN"]:
+            return "Verification token mismatch", 403
+        return request.args["hub.challenge"], 200
+
+    return "Hello world", 200
+
 
 @app.route('/', methods=['POST'])
 def webhook():
-    req = request.get_json(silent=True, force=True)
 
-    print("Request:")
-    print(json.dumps(req, indent=4))
+    # endpoint for processing incoming messaging events
 
-    res = makeWebhookResult(req)
+    data = request.get_json()
+    log(data)  # you may not want to log every incoming message in production, but it's good for testing
 
-    res = json.dumps(res, indent=4)
-    print(res)
-    r = make_response(res)
-    r.headers['Content-Type'] = 'application/json'
-    return r
+    if data["object"] == "page":
 
-def makeWebhookResult(req):
-    global speech
-    intentofDF = req.get("queryResult").get("intent").get("displayName")
-    if intentofDF == "Complexquery":
-        speech = complexq()
-        result = {
-            "fulfillmentText": speech,
-            # "source": "facebook",
-                "fulfillmentMessages": [
-                    # {
-                    #     "platform": "FACEBOOK",
-                    #     "card": {
-                    #         "title": "Title: this is a title",
-                    #         "subtitle": "This is an subtitle.  Text can include unicode characters including emoji 📱.",
-                    #         "imageUri": "https://developers.google.com/actions/images/badges/XPM_BADGING_GoogleAssistant_VER.png",
-                    #         "buttons": [
-                    #             {
-                    #                 "text": "This is a button",
-                    #                 "postback": "https://assistant.google.com/"
-                    #             }
-                    #         ]
-                    #     }
-                    # },
-                    {
-                        "platform": "FACEBOOK",
-                        "text": {
-                            "text": [
-                                speech
-                            ]
-                        }
-                    }
-                ],
-            }
-        return result
+        for entry in data["entry"]:
+            for messaging_event in entry["messaging"]:
 
-    if intentofDF == "Complexquery - yes":
-        processedorder = totalprice("C:/Users/Asus-Laptop/Desktop", speech)
-        result = {
-            "fulfillmentText": processedorder,
-            # "source": "facebook",
-            "fulfillmentMessages": [
-                {
-                    "platform": "FACEBOOK",
-                    "text": {
-                        "text": [
-                            "The total price for your order is $", processedorder
-                        ]
-                    }
-                }
-            ],
+                if messaging_event.get("message"):  # someone sent us a message
+
+                    sender_id = messaging_event["sender"]["id"]        # the facebook ID of the person sending you the message
+                    recipient_id = messaging_event["recipient"]["id"]  # the recipient's ID, which should be your page's facebook ID
+                    message_text = messaging_event["message"]["text"]  # the message's text
+                    # Test for Fiance search result
+                    
+                    consult="https://www.stockconsultant.com/consultnow/basicplus.cgi?symbol="
+                    seeking_alpha="https://seekingalpha.com/symbol/"
+                    inter2="?s="
+                    space="\n\n"
+                    
+                    quote_consult=consult+message_text                    
+                    quote_sa=seeking_alpha+message_text+inter2+message_text
+                    
+                    quote=quote_consult+space+quote_sa
+                    
+                    send_message(sender_id,quote)
+
+                if messaging_event.get("delivery"):  # delivery confirmation
+                    pass
+
+                if messaging_event.get("optin"):  # optin confirmation
+                    pass
+
+                if messaging_event.get("postback"):  # user clicked/tapped "postback" button in earlier message
+                    pass
+
+    return "ok", 200
+
+
+def send_message(recipient_id, message_text):
+
+    log("sending message to {recipient}: {text}".format(recipient=recipient_id, text=message_text))
+
+    params = {
+        "access_token": os.environ["PAGE_ACCESS_TOKEN"]
+    }
+    headers = {
+        "Content-Type": "application/json"
+    }
+    data = json.dumps({
+        "recipient": {
+            "id": recipient_id
+        },
+        "message": {
+            "text": message_text
         }
-        return result
+    })
+    r = requests.post("https://graph.facebook.com/v2.6/me/messages", params=params, headers=headers, data=data)
+    if r.status_code != 200:
+        log(r.status_code)
+        log(r.text)
 
-    if intentofDF == "list_drink":
-        result = {
-            "fulfillmentMessages": [
-                {
-                    "platform": "FACEBOOK",
-                    "text": {
-                        "text": [
-                            "We have the following sides: ", drinkslist()
-                        ]
-                    }
-                }
-            ],
-        }
-        return result
 
-    if intentofDF == "list_side_dishes":
-        result = {
-            "fulfillmentMessages": [
-                {
-                    "platform": "FACEBOOK",
-                    "text": {
-                        "text": [
-                            "We have the following sides: ", sideslist()
-                        ]
-                    }
-                }
-            ],
-        }
-        return result
-
-    if intentofDF == "list_food_by_cuisine":
-        result = {
-            "fulfillmentMessages": [
-                {
-                    "platform": "FACEBOOK",
-                    "text": {
-                        "text": [
-                            "We have the following food: ", foodlist()
-                        ]
-                    }
-                }
-            ],
-        }
-        return result
+def log(message):  # simple wrapper for logging to stdout on heroku
+    print str(message)
+    sys.stdout.flush()
 
 
 if __name__ == '__main__':
-    port = int(os.getenv('PORT', 5000))
-
-    print ("Starting app on port %d" %(port))
-
-    app.run(debug=True, port=port, host='0.0.0.0')
+    app.run(debug=True)

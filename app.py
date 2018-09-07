@@ -15,7 +15,7 @@ app = Flask(__name__)
 
 speech = ""
 
-@app.route('/', methods=['POST', 'GET'])
+@app.route('/', methods=['POST'])
 def webhook():
     req = request.get_json(silent=True, force=True)
 

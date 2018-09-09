@@ -12,3 +12,4 @@ pathlib==1.0.1
 pathlib2==2.3.0
 numpy==1.14.0
 numpydoc==0.7.0
+gunicorn==19.7.1

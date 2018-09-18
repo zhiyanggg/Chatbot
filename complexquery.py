@@ -221,7 +221,7 @@ def complexq(query_text):
     totalcount = len(doc4.ents)
     global foodordered, drinksordered, sidesordered
     for ent in doc4.ents:
-        if count == totalcount-3 and count != 0 and ent.label_ == "QUANTITY":
+        if count == totalcount-3 and ent.label_ == "QUANTITY":
             result += " and "
 
         if count == totalcount - 2 and count != 0 and ent.label_ == "QUANTITY":

@@ -9,7 +9,7 @@ drinks = ("milk tea", "lao hor", "soy bean", "coffee", "kopi", "beer gao", "milo
 
 sides = ("fries", "mash potato", "toast cube", "salad", "soup", "spaghetti")
 
-numbers = open("C:/Users/Asus-Laptop/Desktop/numbers without word forms.txt", "r")
+numbers = open("/app/numbers without word forms.txt", "r")
 numbers = numbers.read()
 
 trained_data = []

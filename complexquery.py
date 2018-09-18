@@ -9,23 +9,27 @@ import regex
 from symspell import *
 import time
 from tqdm import tqdm
-from spacy_api import LocalClient
-from spacy_api import api
-from spacy_api import Client
 import json
 from flask import request
 import mysql
 import mysql.connector
 
+
 config = {
-    'user': 'root',
-    'password': '',
-    'host': 'localhost',
-    'database': 'chatbot',
+    'user': 'b521de1b9b742d',
+    'password': 'c80285f8',
+    'host': 'us-cdbr-iron-east-01.cleardb.net',
+    'database': 'heroku_b719ec770e665f0',
     'raise_on_warnings': True,
 }
 
-cachedStopWords = open("C:/Users/Asus-Laptop/Desktop/stopwords.txt", "r")
+nlp = spacy.load("/app/en_core_web_sm")
+print("loaded en_core_web_sm model succeeded")
+
+nlp1 = spacy.load("/app")
+print("loaded self-trained model succeeded")
+
+cachedStopWords = open("/app/stopwords.txt", "r")
 cachedStopWords = cachedStopWords.read()
 numbers = {"zero":0, "one":1, "two":2, "three":3, "four":4, "five":5, "six":6, "seven":7, "eight":8, "nine":9}
 foodordered = []
@@ -33,7 +37,13 @@ drinksordered = []
 sidesordered = []
 cnx = mysql.connector.connect(**config)
 print("logon to mysql")
-cursor = cnx.cursor()
+cursor = cnx.cursor(buffered=True)
+
+def connecttomysql():
+    global cursor, cnx
+    cnx = mysql.connector.connect(**config)
+    print("logon to mysql")
+    cursor = cnx.cursor(buffered=True)
 
 
 def cleantext(s):   # remove stop words, multiple spaces, special characters and punctuations
@@ -55,11 +65,11 @@ def cleantext(s):   # remove stop words, multiple spaces, special characters and
 
     # print("this is newstring ", s)
     s = spellingchecker(s)
-    nlp = api.get_nlp(model="en_core_web_md", embeddings_path="en_google")
-
     # nlp = ('en_core_web_md')
     # nlp.remove_pipe('parser')
     document = nlp(s)
+    print("created doc for en model")
+
     # for ent in document.ents:
     #     print(ent.text, ent.label_)
 
@@ -99,61 +109,61 @@ TRAIN_DATA = foodtraining()
     new_model_name=("New model name for model meta.", "option", "nm", str),
     output_dir=("Optional output directory", "option", "o", Path),
     n_iter=("Number of training iterations", "option", "n", int))
-def complexq(model=None, new_model_name='food', output_dir="C:/Users/Asus-Laptop/Desktop", n_iter=20):
+def trainnewmodel(model=None, new_model_name='food', output_dir="/app", n_iter=20):
     # """Set up the pipeline and entity recognizer, and train the new entity."""
-    # if model is not None:
-    #     nlp = spacy.load(model)  # load existing spaCy model
-    #     print("Loaded model '%s'" % model)
-    # else:
-    #     nlp = spacy.blank('en')  # create blank Language class
-    #     print("Created blank 'en' model")
-    # # Add entity recognizer to model if it's not in the pipeline
-    # # nlp.create_pipe works for built-ins that are registered with spaCy
-    # if 'ner' not in nlp.pipe_names:
-    #     ner = nlp.create_pipe('ner')
-    #     nlp.add_pipe(ner)
-    # # otherwise, get it, so we can add labels to it
-    # else:
-    #     ner = nlp.get_pipe('ner')
-    #
-    # ner.add_label('DRINKS')  # add new entity label to entity recognizer
-    # ner.add_label('SIDES')  # add new entity label to entity recognizer
-    # ner.add_label('FOOD')   # add new entity label to entity recognizer
-    # ner.add_label('SIZE')   # add new entity label to entity recognizer
-    # ner.add_label('QUANTITY')   # add new entity label to entity recognizer
-    # # print("added labels")
-    # if model is None:
-    #     optimizer = nlp.begin_training()
-    #     # print("beginning training")
-    # else:
-    #     # Note that 'begin_training' initializes the models, so it'll zero out
-    #     # existing entity types.
-    #     optimizer = nlp.entity.create_optimizer()
-    #
-    # # get names of other pipes to disable them during training
-    # other_pipes = [pipe for pipe in nlp.pipe_names if pipe != 'ner']
-    # with nlp.disable_pipes(*other_pipes):  # only train NER
-    #     for itn in range(n_iter):
-    #         random.shuffle(TRAIN_DATA)
-    #         # print("finish shuffling")
-    #         losses = {}
-    #         for text, annotations in tqdm(TRAIN_DATA):
-    #             nlp.update([text],  # batch of texts
-    #                        [annotations],  # batch of annotations
-    #                        sgd=optimizer,  # callable to update weights
-    #                        drop=0.35,  # make it harder to memorise data
-    #                        losses=losses)
-    #         print(losses)
-    #         print("losses fault")
-    #
-    # # save model to output directory
-    # if output_dir is not None:
-    #     output_dir = Path(output_dir)
-    #     if not output_dir.exists():
-    #         output_dir.mkdir()
-    #     nlp.meta['name'] = new_model_name  # rename model
-    #     nlp.to_disk(output_dir)
-    #     print("Saved model to", output_dir)
+    if model is not None:
+        nlp = spacy.load(model)  # load existing spaCy model
+        print("Loaded model '%s'" % model)
+    else:
+        nlp = spacy.blank('en')  # create blank Language class
+        print("Created blank 'en' model")
+    # Add entity recognizer to model if it's not in the pipeline
+    # nlp.create_pipe works for built-ins that are registered with spaCy
+    if 'ner' not in nlp.pipe_names:
+        ner = nlp.create_pipe('ner')
+        nlp.add_pipe(ner)
+    # otherwise, get it, so we can add labels to it
+    else:
+        ner = nlp.get_pipe('ner')
+
+    ner.add_label('DRINKS')  # add new entity label to entity recognizer
+    ner.add_label('SIDES')  # add new entity label to entity recognizer
+    ner.add_label('FOOD')   # add new entity label to entity recognizer
+    ner.add_label('SIZE')   # add new entity label to entity recognizer
+    ner.add_label('QUANTITY')   # add new entity label to entity recognizer
+    # print("added labels")
+    if model is None:
+        optimizer = nlp.begin_training()
+        # print("beginning training")
+    else:
+        # Note that 'begin_training' initializes the models, so it'll zero out
+        # existing entity types.
+        optimizer = nlp.entity.create_optimizer()
+
+    # get names of other pipes to disable them during training
+    other_pipes = [pipe for pipe in nlp.pipe_names if pipe != 'ner']
+    with nlp.disable_pipes(*other_pipes):  # only train NER
+        for itn in range(n_iter):
+            random.shuffle(TRAIN_DATA)
+            # print("finish shuffling")
+            losses = {}
+            for text, annotations in tqdm(TRAIN_DATA):
+                nlp.update([text],  # batch of texts
+                           [annotations],  # batch of annotations
+                           sgd=optimizer,  # callable to update weights
+                           drop=0.35,  # make it harder to memorise data
+                           losses=losses)
+            print(losses)
+            print("losses fault")
+
+    # save model to output directory
+    if output_dir is not None:
+        output_dir = Path(output_dir)
+        if not output_dir.exists():
+            output_dir.mkdir()
+        nlp.meta['name'] = new_model_name  # rename model
+        nlp.to_disk(output_dir)
+        print("Saved model to", output_dir)
 
 
     # # test the saved model
@@ -199,25 +209,24 @@ def complexq(model=None, new_model_name='food', output_dir="C:/Users/Asus-Laptop
     # ## This is the end of the section that contains testing samples
 
 
-    ## Uncomment the following codes below to run everything on dialogflow
-    req1 = request.get_json(silent=True, force=True)
-    test_text2 = req1.get("queryResult").get("queryText")
-    spacy_client = Client()
-    nlp = api.get_nlp(model=output_dir)
+def complexq(query_text):
+    test_text2 = query_text
     test_text2 = cleantext(test_text2)
     print(test_text2)
-    doc4 = nlp(test_text2)
+    doc4 = nlp1(test_text2)
+    print("created doc for food model")
     result = "You wish to order "
     quantity = []
     count = 0
     totalcount = len(doc4.ents)
     global foodordered, drinksordered, sidesordered
     for ent in doc4.ents:
-        if count == totalcount-3 and ent.label_ == "QUANTITY":
+        if count == totalcount-3 and count != 0 and ent.label_ == "QUANTITY":
             result += " and "
 
-        if count == totalcount - 2 and ent.label_ == "QUANTITY":
+        if count == totalcount - 2 and count != 0 and ent.label_ == "QUANTITY":
             result += " and "
+
 
         if (ent.label_) == "QUANTITY":
             result += ent.text
@@ -228,44 +237,82 @@ def complexq(model=None, new_model_name='food', output_dir="C:/Users/Asus-Laptop
             continue
 
         if (ent.label_) == "FOOD":
-            foodordered.append(quantity[0])
-            foodordered.append(ent.text)
-            result += ent.text
-            # result += ", "
-            count = count + 1
-            continue
+            if quantity:
+                foodordered.append(quantity[0])
+                foodordered.append(ent.text)
+                result += ent.text
+                result += ", "
+                count = count + 1
+                continue
+
+            else:
+                # print("Please input the quantity for your food,", ent.text, ": ")
+                # quantityoffood = input()
+                # foodordered.append(quantityoffood)
+                # foodordered.append(ent.text)
+                # result += ent.text
+                # # result += ", "
+                # count = count + 1
+                continue
 
         if (ent.label_) == "DRINKS":
-            drinksordered.append(quantity[0])
-            drinksordered.append(ent.text)
-            result += ent.text
-            # result += ", "
-            count = count + 1
-            continue
+            if quantity:
+                drinksordered.append(quantity[0])
+                drinksordered.append(ent.text)
+                result += ent.text
+                result += ", "
+                count = count + 1
+                continue
+
+            else:
+                # print("Please input the quantity for your drinks,", ent.text, ": ")
+                # quantityofdrinks = input()
+                # drinksordered.append(quantityofdrinks)
+                # drinksordered.append(ent.text)
+                # result += ent.text
+                # # result += ", "
+                # count = count + 1
+                continue
 
         if (ent.label_) == "SIDES":
-            sidesordered.append(quantity[0])
-            sidesordered.append(ent.text)
-            result += ent.text
-            # result += ", "
-            count = count + 1
-            continue
+            if quantity:
+                sidesordered.append(quantity[0])
+                sidesordered.append(ent.text)
+                result += ent.text
+                result += ", "
+                count = count + 1
+                continue
 
-        # else:
+            else:
+                # print("Please input the quantity for your sides,", ent.text, ": ")
+                # quantityofsides = input()
+                # sidesordered.append(quantityofsides)
+                # sidesordered.append(ent.text)
+                # result += ent.text
+                # # result += ", "
+                # count = count + 1
+                continue
+
+
+        else:
         #     result += ent.text
         #     result += ", "
         #     count = count + 1
-        #     continue
+             continue
 
 
     print('Entities', [(ent.text, ent.label_) for ent in doc4.ents])
     # result = (spacy_client.testfunc(doc4))
     return result
 
-def totalprice(output_dir,speech):
+
+def totalprice():
     total = float(0)
+    if not cnx.is_connected():
+        connecttomysql()
+
     for i in range(len(sidesordered)):
-        # print("this is sides ordered", sidesordered[i])
+        print("this is the sides ordered", sidesordered[i])
         sqlquery = ""
 
         if len(sidesordered) == 0:
@@ -284,7 +331,7 @@ def totalprice(output_dir,speech):
 
 
     for i in range(len(drinksordered)):
-        # print("this is drinks ordered", drinksordered[i])
+        print("this is the drinks ordered", drinksordered[i])
         sqlquery = ""
 
         if len(drinksordered) == 0:
@@ -301,7 +348,7 @@ def totalprice(output_dir,speech):
             total += drinksprice
 
     for i in range(len(foodordered)):
-        # print("this is food ordered", foodordered[i])
+        print("this is the food ordered", foodordered[i])
         sqlquery = ""
 
         if len(foodordered) == 0:
@@ -326,9 +373,8 @@ def foodlist():
     query = "SELECT fname FROM food"
     cursor.execute(query)
     for row in cursor:
-        foodlist += "\\n"
         foodlist += row[0]
-
+        foodlist += "\u000A"
     return foodlist
 
 def sideslist():
@@ -336,9 +382,8 @@ def sideslist():
     query = "SELECT sname FROM sides"
     cursor.execute(query)
     for row in cursor:
-        sideslist += "\\n"
         sideslist += row[0]
-
+        sideslist += "\u000A"
     return sideslist
 
 def drinkslist():
@@ -346,9 +391,8 @@ def drinkslist():
     query = "SELECT dname FROM drinks"
     cursor.execute(query)
     for row in cursor:
-        drinkslist += "\\n"
         drinkslist += row[0]
-
+        drinkslist += "\u000A"
     return drinkslist
 
 # if __name__ == '__main__':

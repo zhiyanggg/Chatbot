@@ -625,7 +625,7 @@ def spellingchecker(x):
     symSpell = SymSpell()
     # symSpell.load_dictionary('C:/Users/Asus-Laptop/Desktop/frequency_dictionary_en_82_765.txt')
     # symSpell.load_dictionary('C:/Users/Asus-Laptop/Desktop/corpus.txt')
-    symSpell.load_dictionary('C:/Users/Asus-Laptop/Desktop/oldcorpus.txt')
+    symSpell.load_dictionary('/app/oldcorpus.txt')
     x = (symSpell.lookup_compound(x, 2)).term
     return x
     # end = time.time()

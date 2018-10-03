@@ -26,6 +26,7 @@ print("finish loading food database data cache")
 listofsides = sideslist()
 print("finish loading sides database data cache")
 
+
 @app.route('/', methods=['GET'])
 def verify():
     # our endpoint echos back the 'hub.challenge' value specified when we setup the webhook
@@ -136,82 +137,213 @@ def handle_incoming_messages():
 
     elif intentofDF == "Complexquery - yes":
         processedorder = totalprice()
-        # result = {
-        #     "fulfillmentText": processedorder,
-        #     # "source": "facebook",
-        #     "fulfillmentMessages": [
-        #         {
-        #             "platform": "FACEBOOK",
-        #             "text": {
-        #                 "text": [
-        #                     "The total price for your order is $", processedorder
-        #                 ]
-        #             }
-        #         }
-        #     ],
-        # }
-        reply(sender, "The total price for your order is $"+str(round(processedorder, 2)))
+        # reply(sender, "The total price for your order is $"+str(round(processedorder, 2)))
+        reply(sender, str(processedorder))
+
+    elif intentofDF == "ask_menu":
+        menu = "----------------------------"
+        menu += "\u000A"
+        menu += "Food:"
+        menu += "\u000A"
+        menu += "----------------------------"
+        menu += "\u000A"
+        menu += listoffood
+        menu += "\u000A"
+        menu += "----------------------------"
+        menu += "\u000A"
+        menu += "Drinks:"
+        menu += "\u000A"
+        menu += "----------------------------"
+        menu += "\u000A"
+        menu += listofdrinks
+        menu += "\u000A"
+        menu += "----------------------------"
+        menu += "\u000A"
+        menu += "Sides:"
+        menu += "\u000A"
+        menu += "----------------------------"
+        menu += "\u000A"
+        menu += listofsides
+        reply(sender, menu)
 
     elif intentofDF == "list_drink":
-        # result = {
-        #     "fulfillmentMessages": [
-        #         {
-        #             "platform": "FACEBOOK",
-        #             "text": {
-        #                 "text": [
-        #                     "We have the following sides: ", drinkslist()
-        #                 ]
-        #             }
-        #         }
-        #     ],
-        # }
         reply(sender, "We have the following drinks: \u000A"+listofdrinks)
 
     elif intentofDF == "list_side_dishes":
-        # result = {
-        #     "fulfillmentMessages": [
-        #         {
-        #             "platform": "FACEBOOK",
-        #             "text": {
-        #                 "text": [
-        #                     "We have the following sides: ", sideslist()
-        #                 ]
-        #             }
-        #         }
-        #     ],
-        # }
         reply(sender, "We have the following sides: \u000A"+listofsides)
 
     elif intentofDF == "list_food_by_cuisine":
-        # result = {
-        #     "fulfillmentMessages": [
-        #         {
-        #             "platform": "FACEBOOK",
-        #             "text": {
-        #                 "text": [
-        #                     "We have the following food: ", foodlist()
-        #                 ]
-        #             }
-        #         }
-        #     ],
-        # }
         reply(sender,  "We have the following food: \u000A"+listoffood)
 
-    else:
-        reply(sender, response.query_result.fulfillment_text)
-    # reply(sender, json.dumps(result, indent=4))
+    elif intentofDF == "ask_food_description":
+        print("parameters is ", response.query_result.parameters, "type is ", type(response.query_result.parameters))
+        print("food item is", response.query_result.parameters['foods'])
+        info = fooddetails(response.query_result.parameters['foods'])
+        print("item info is ", info)
+        r = requests.post("https://graph.facebook.com/v2.6/me/messages",
+                          params={"access_token": ACCESS_TOKEN},
+                          data=json.dumps({
+                              "recipient": {
+                                  "id": sender
+                              },
+                              "message": {
+                                  "attachment": {
+                                      "type": "template",
+                                      "payload": {
+                                          "template_type": "generic",
+                                          "elements": [
+                                              {
+                                                  "title": info[0],
+                                                  "image_url": info[3],
+                                                  "subtitle": (info[2] + " The price of the food is " + str(info[1])),
+                                                  "default_action": {
+                                                      "type": "web_url",
+                                                      "url": info[3],
+                                                      "webview_height_ratio": "tall",
+                                                  },
+                                                  "buttons": [
+                                                      {
+                                                          "type": "postback",
+                                                          "title": "Order now",
+                                                          "payload": str("1 " + info[0])
+                                                      }
+                                                  ]
+                                              }
+                                          ]
+                                      }
+                                  }
+                              }
+                          }),
+                          headers={'Content-type': 'application/json'})
+        if r.status_code != requests.codes.ok:
+            print(r.text)
+
+    elif intentofDF == "ask_drinks_description":
+        print("parameters is ", response.query_result.parameters, "type is ", type(response.query_result.parameters))
+        print("Drink item is", response.query_result.parameters['drinks'])
+        info = drinksdetails(response.query_result.parameters['drinks'])
+        print("item info is ", info)
+        r = requests.post("https://graph.facebook.com/v2.6/me/messages",
+                          params={"access_token": ACCESS_TOKEN},
+                          data=json.dumps({
+                              "recipient": {
+                                  "id": sender
+                              },
+                              "message": {
+                                        "attachment": {
+                                          "type": "template",
+                                          "payload": {
+                                            "template_type": "list",
+                                            "top_element_style": "compact",
+                                            "elements": [
+                                              {
+                                                "title": "Classic T-Shirt Collection",
+                                                "subtitle": "See all our colors",
+                                                "image_url": "http://cdn.shopify.com/s/files/1/2401/4535/products/simplewhitetshirt_1024x1024.png?v=1506552579",
+
+                                              },
+                                              {
+                                                "title": "Classic White T-Shirt",
+                                                "subtitle": "See all our colors",
+                                                "default_action": {
+                                                  "type": "web_url",
+                                                  "url": "http://cdn.shopify.com/s/files/1/2401/4535/products/simplewhitetshirt_1024x1024.png?v=1506552579",
+                                                  "messenger_extensions": False,
+                                                  "webview_height_ratio": "tall"
+                                                }
+                                              },
+                                              {
+                                                "title": "Classic Blue T-Shirt",
+                                                "image_url": "http://cdn.shopify.com/s/files/1/2401/4535/products/simplewhitetshirt_1024x1024.png?v=1506552579",
+                                                "subtitle": "100% Cotton, 200% Comfortable"
+                                              }
+                                            ]
+                                          }
+                                        }
+                                        }
+                          }),
+                          headers={'Content-type': 'application/json'})
+        if r.status_code != requests.codes.ok:
+            print(r.text)
+
+    elif intentofDF == "ask_sides_description":
+        print("parameters is ", response.query_result.parameters, "type is ", type(response.query_result.parameters))
+        print("side item is", response.query_result.parameters['side_dish'])
+        info = sidesdetails(response.query_result.parameters['side_dish'])
+        print("item info is ", info)
+        r = requests.post("https://graph.facebook.com/v2.6/me/messages",
+                          params={"access_token": ACCESS_TOKEN},
+                          data=json.dumps({
+                              "recipient": {
+                                  "id": sender
+                              },
+                              "message": {
+                                  "attachment": {
+                                      "type": "template",
+                                      "payload": {
+                                          "template_type": "generic",
+                                          "elements": [
+                                              {
+                                                  "title": info[0],
+                                                  "image_url": info[3],
+                                                  "subtitle": (info[2] + " The price of the food is " + str(info[1])),
+                                                  "default_action": {
+                                                      "type": "web_url",
+                                                      "url": info[3],
+                                                      "webview_height_ratio": "tall",
+                                                  },
+                                                  "buttons": [
+                                                      {
+                                                          "type": "postback",
+                                                          "title": "Order now",
+                                                          "payload": str("1 " + info[0])
+                                                      }
+                                                  ]
+                                              }
+                                          ]
+                                      }
+                                  }
+                              }
+                          }),
+                          headers={'Content-type': 'application/json'})
+        if r.status_code != requests.codes.ok:
+            print(r.text)
+    #     # speech = complexq(response.query_result.query_text)
+    #     result = {
+    #         "fulfillmentText": "This is the details of the food you wanted",
+    #         # "source": "facebook",
+    #         "fulfillmentMessages": [
+    #             {
+    #                 "platform": "FACEBOOK",
+    #                 "card": {
+    #                     "title": "Title: this is a title",
+    #                     "subtitle": "This is an subtitle.  Text can include unicode characters including emoji 📱.",
+    #                     "imageUri": "https://developers.google.com/actions/images/badges/XPM_BADGING_GoogleAssistant_VER.png",
+    #                     "buttons": [
+    #                         {
+    #                             "text": "This is a button",
+    #                             "postback": "https://assistant.google.com/"
+    #                         }
+    #                     ]
+    #                 }
+    #             },
+    #             {
+    #                 "platform": "FACEBOOK",
+    #                 "text": {
+    #                     "text": [
+    #                         "This is the details of the food you wanted"
+    #                     ]
+    #                 }
+    #             }
+    #         ],
+    #     }
+    #     reply(sender, result["fulfillmentMessages"])
+    #
+    # else:
+    #     reply(sender, response.query_result.fulfillment_text)
+    # # reply(sender, json.dumps(result, indent=4))
+
     return 'OK'
 
-# def webhook(result):
-#     res = json.dumps(result, indent=4)
-#     print(res)
-#     r = make_response(res)
-#     r.headers['Content-Type'] = 'application/json'
-#     data = request.json
-#     sender = data['entry'][0]['messaging'][0]['sender']['id']
-#     speechtoreturn = reply(sender, r)
-#
-#     return speechtoreturn
-
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, use_reloader=False)

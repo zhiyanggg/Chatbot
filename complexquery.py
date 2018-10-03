@@ -14,14 +14,15 @@ from flask import request
 import mysql
 import mysql.connector
 
-
 config = {
     'user': 'b521de1b9b742d',
     'password': 'c80285f8',
     'host': 'us-cdbr-iron-east-01.cleardb.net',
     'database': 'heroku_b719ec770e665f0',
     'raise_on_warnings': True,
+	'connection_timeout': 1800,
 }
+totalresponse = ""
 
 nlp = spacy.load("/app/en_core_web_sm")
 print("loaded en_core_web_sm model succeeded")
@@ -221,7 +222,7 @@ def complexq(query_text):
     totalcount = len(doc4.ents)
     global foodordered, drinksordered, sidesordered
     for ent in doc4.ents:
-        if count == totalcount-3 and ent.label_ == "QUANTITY":
+        if count == totalcount-3 and count != 0 and ent.label_ == "QUANTITY":
             result += " and "
 
         if count == totalcount - 2 and count != 0 and ent.label_ == "QUANTITY":
@@ -241,9 +242,13 @@ def complexq(query_text):
                 foodordered.append(quantity[0])
                 foodordered.append(ent.text)
                 result += ent.text
-                result += ", "
-                count = count + 1
-                continue
+                if (count == totalcount - 2 and count != 0) or (count == totalcount-3 and count != 0):
+                    count = count + 1
+                    continue
+                else:
+                    result += ", "
+                    count = count + 1
+                    continue
 
             else:
                 # print("Please input the quantity for your food,", ent.text, ": ")
@@ -260,9 +265,13 @@ def complexq(query_text):
                 drinksordered.append(quantity[0])
                 drinksordered.append(ent.text)
                 result += ent.text
-                result += ", "
-                count = count + 1
-                continue
+                if (count == totalcount - 2 and count != 0) or (count == totalcount - 3 and count != 0):
+                    count = count + 1
+                    continue
+                else:
+                    result += ", "
+                    count = count + 1
+                    continue
 
             else:
                 # print("Please input the quantity for your drinks,", ent.text, ": ")
@@ -279,9 +288,13 @@ def complexq(query_text):
                 sidesordered.append(quantity[0])
                 sidesordered.append(ent.text)
                 result += ent.text
-                result += ", "
-                count = count + 1
-                continue
+                if (count == totalcount - 2 and count != 0) or (count == totalcount - 3 and count != 0):
+                    count = count + 1
+                    continue
+                else:
+                    result += ", "
+                    count = count + 1
+                    continue
 
             else:
                 # print("Please input the quantity for your sides,", ent.text, ": ")
@@ -307,6 +320,7 @@ def complexq(query_text):
 
 
 def totalprice():
+    global totalresponse
     total = float(0)
     if not cnx.is_connected():
         connecttomysql()
@@ -323,11 +337,15 @@ def totalprice():
 
         else:
             sqlquery += sidesordered[i]
-            query = "SELECT sprice FROM sides WHERE sname = %s"
+            query = "SELECT * FROM sides WHERE sname = %s"
             cursor.execute(query, (sqlquery,))
-            sidesprice = float(sidesordered[i-1]) * cursor.fetchone()[0]
+            result = cursor.fetchone()
+            sidesprice = float(sidesordered[i-1]) * result[1]
+            sidesname = result[0]
             total += sidesprice
-
+            totalresponse += ("The price of the " + sidesname + " is $" + str(round(sidesprice, 2)))
+            totalresponse += "\u000A"
+            print("got reach here")
 
 
     for i in range(len(drinksordered)):
@@ -342,10 +360,15 @@ def totalprice():
 
         else:
             sqlquery += drinksordered[i]
-            query = "SELECT dprice FROM drinks WHERE dname = %s"
+            query = "SELECT * FROM drinks WHERE dname = %s"
             cursor.execute(query, (sqlquery,))
-            drinksprice = float(drinksordered[i-1]) * cursor.fetchone()[0]
+            result = cursor.fetchone()
+            drinksprice = float(drinksordered[i-1]) * result[1]
+            drinksname = result[0]
             total += drinksprice
+            totalresponse += ("The price of the " + drinksname + " is $" + str(round(drinksprice, 2)))
+            totalresponse += "\u000A"
+            print("got reach here")
 
     for i in range(len(foodordered)):
         print("this is the food ordered", foodordered[i])
@@ -359,13 +382,22 @@ def totalprice():
 
         else:
             sqlquery += foodordered[i]
-            query = "SELECT fprice FROM food WHERE fname = %s"
+            query = "SELECT * FROM food WHERE fname = %s"
             cursor.execute(query, (sqlquery,))
-            foodprice = float(foodordered[i-1]) * cursor.fetchone()[0]
+            result = cursor.fetchone()
+            foodprice = float(foodordered[i-1]) * result[1]
+            foodname = result[0]
             total += foodprice
+            totalresponse += ("The price of the " + foodname + " is $" + str(round(foodprice, 2)))
+            totalresponse += "\u000A"
+            print("got reach here")
 
+    totalresponse += "----------------------------"
+    totalresponse += "\u000A"
+    totalresponse += ("Total price for today's meal is $" + str(total))
     print("this is the total price, ", total)
-    return total
+    print(totalresponse)
+    return totalresponse
 
 
 def foodlist():
@@ -394,6 +426,39 @@ def drinkslist():
         drinkslist += row[0]
         drinkslist += "\u000A"
     return drinkslist
+
+def drinksdetails(s):
+    drinksdetailslist = []
+    sqlquery = s
+    query = "SELECT * FROM drinks WHERE dname = %s"
+    cursor.execute(query, (sqlquery,))
+    for col in cursor.fetchone():
+        print(col)
+        drinksdetailslist.append(col)
+    return drinksdetailslist
+
+def sidesdetails(s):
+    sidesdetailslist = []
+    sqlquery = s
+    query = "SELECT * FROM sides WHERE sname = %s"
+    cursor.execute(query, (sqlquery,))
+    for col in cursor.fetchone():
+        print(col)
+        sidesdetailslist.append(col)
+    return sidesdetailslist
+
+
+def fooddetails(s):
+    fooddetailslist = []
+    sqlquery = s
+    print("sqlquery is", sqlquery)
+    print("type of sqlquery is ", type(sqlquery))
+    query = "SELECT * FROM food WHERE fname = %s"
+    cursor.execute(query, (sqlquery,))
+    for col in cursor.fetchone():
+        print(col)
+        fooddetailslist.append(col)
+    return fooddetailslist
 
 # if __name__ == '__main__':
 #     plac.call(main)

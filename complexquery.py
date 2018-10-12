@@ -64,7 +64,7 @@ def cleantext(s):   # remove stop words, multiple spaces, special characters and
 
     s = newstring1
 
-    # print("this is newstring ", s)
+    print("this is newstring ", s)
     s = spellingchecker(s)
     # nlp = ('en_core_web_md')
     # nlp.remove_pipe('parser')
@@ -76,20 +76,17 @@ def cleantext(s):   # remove stop words, multiple spaces, special characters and
 
             # ent.text = str(numbers[ent.text])
     s = ' '.join([token.lemma_ for token in document])
-    # print(s)# after lemmatization
+    print(s)# after lemmatization
     newstring = ""
     for word in s.split():
         if word == "fry" or word =="frys":
             word = "fries"
-
-
-
         newstring += word
         newstring += " "
     s = newstring
-    # print(newstring)# after attempt
+    print(newstring)# after attempt
     s = ' '.join([word for word in s.split() if word not in cachedStopWords])
-    # print(s)# after removing stopwords
+    print(s)# after removing stopwords
     return s
 
 # test_text2 = 'i want 3 sticks of satay, 4 fries and 3 cups of coffee'
@@ -212,7 +209,8 @@ def trainnewmodel(model=None, new_model_name='food', output_dir="/app", n_iter=2
 
 def complexq(query_text):
     test_text2 = query_text
-    test_text2 = cleantext(test_text2)
+    # if clean == "needclean":
+    #     test_text2 = cleantext(test_text2)
     print(test_text2)
     doc4 = nlp1(test_text2)
     print("created doc for food model")
@@ -246,7 +244,7 @@ def complexq(query_text):
                     count = count + 1
                     continue
                 else:
-                    result += ", "
+                    # result += ", "
                     count = count + 1
                     continue
 
@@ -269,7 +267,7 @@ def complexq(query_text):
                     count = count + 1
                     continue
                 else:
-                    result += ", "
+                    # result += ", "
                     count = count + 1
                     continue
 
@@ -292,7 +290,7 @@ def complexq(query_text):
                     count = count + 1
                     continue
                 else:
-                    result += ", "
+                    # result += ", "
                     count = count + 1
                     continue
 
@@ -345,7 +343,6 @@ def totalprice():
             total += sidesprice
             totalresponse += ("The price of the " + sidesname + " is $" + str(round(sidesprice, 2)))
             totalresponse += "\u000A"
-            print("got reach here")
 
 
     for i in range(len(drinksordered)):
@@ -368,7 +365,6 @@ def totalprice():
             total += drinksprice
             totalresponse += ("The price of the " + drinksname + " is $" + str(round(drinksprice, 2)))
             totalresponse += "\u000A"
-            print("got reach here")
 
     for i in range(len(foodordered)):
         print("this is the food ordered", foodordered[i])
@@ -390,7 +386,6 @@ def totalprice():
             total += foodprice
             totalresponse += ("The price of the " + foodname + " is $" + str(round(foodprice, 2)))
             totalresponse += "\u000A"
-            print("got reach here")
 
     totalresponse += "----------------------------"
     totalresponse += "\u000A"

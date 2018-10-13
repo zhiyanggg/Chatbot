@@ -210,7 +210,7 @@ def trainnewmodel(model=None, new_model_name='food', output_dir="/app", n_iter=2
 def complexq(query_text):
     test_text2 = query_text
     # if clean == "needclean":
-    #     test_text2 = cleantext(test_text2)
+    test_text2 = cleantext(test_text2)
     print(test_text2)
     doc4 = nlp1(test_text2)
     print("created doc for food model")
@@ -244,7 +244,7 @@ def complexq(query_text):
                     count = count + 1
                     continue
                 else:
-                    # result += ", "
+                    result += " "
                     count = count + 1
                     continue
 
@@ -267,7 +267,7 @@ def complexq(query_text):
                     count = count + 1
                     continue
                 else:
-                    # result += ", "
+                    result += " "
                     count = count + 1
                     continue
 
@@ -290,7 +290,7 @@ def complexq(query_text):
                     count = count + 1
                     continue
                 else:
-                    # result += ", "
+                    result += " "
                     count = count + 1
                     continue
 
@@ -341,7 +341,8 @@ def totalprice():
             sidesprice = float(sidesordered[i-1]) * result[1]
             sidesname = result[0]
             total += sidesprice
-            totalresponse += ("The price of the " + sidesname + " is $" + str(round(sidesprice, 2)))
+            # totalresponse += ("The price of the " + sidesname + " is $" + str(round(sidesprice, 2)))
+            totalresponse += (sidesname + " X " + str(int(sidesordered[i-1])) + " = $" + str(round(sidesprice, 2)))
             totalresponse += "\u000A"
 
 
@@ -363,7 +364,8 @@ def totalprice():
             drinksprice = float(drinksordered[i-1]) * result[1]
             drinksname = result[0]
             total += drinksprice
-            totalresponse += ("The price of the " + drinksname + " is $" + str(round(drinksprice, 2)))
+            # totalresponse += ("The price of the " + drinksname + " is $" + str(round(drinksprice, 2)))
+            totalresponse += (drinksname + " X " + str(int(drinksordered[i-1])) + " = $" + str(round(drinksprice, 2)))
             totalresponse += "\u000A"
 
     for i in range(len(foodordered)):
@@ -384,8 +386,10 @@ def totalprice():
             foodprice = float(foodordered[i-1]) * result[1]
             foodname = result[0]
             total += foodprice
-            totalresponse += ("The price of the " + foodname + " is $" + str(round(foodprice, 2)))
+            # totalresponse += ("The price of the " + foodname + " is $" + str(round(foodprice, 2)))
+            totalresponse += (foodname + " X " + str(int(foodordered[i-1])) + " = $" + str(round(foodprice, 2)))
             totalresponse += "\u000A"
+
 
     totalresponse += "----------------------------"
     totalresponse += "\u000A"

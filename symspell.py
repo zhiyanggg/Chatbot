@@ -624,8 +624,8 @@ class SuggestionItem():
 def spellingchecker(x):
     symSpell = SymSpell()
     # symSpell.load_dictionary('C:/Users/Asus-Laptop/Desktop/frequency_dictionary_en_82_765.txt')
-    # symSpell.load_dictionary('/app/oldcorpus.txt')
-    symSpell.load_dictionary('/app/corpus.txt')
+    symSpell.load_dictionary('/app/oldcorpus.txt')
+    # symSpell.load_dictionary('/app/corpus.txt')
     x = (symSpell.lookup_compound(x, 2)).term
     return x
     # end = time.time()

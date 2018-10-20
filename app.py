@@ -27,6 +27,7 @@ print("finish loading sides database data cache")
 info = []
 postbackfood = ""
 postbackfoodorder = ""
+postbackspeech = ""
 
 @app.route('/', methods=['GET'])
 def verify():
@@ -49,9 +50,7 @@ def reply(user_id, msg):
 
 @app.route('/', methods=['POST'])
 def handle_incoming_messages():
-    global speech, info
-    global postbackfoodorder
-    global postbackfood
+    global speech, info, postbackfood, postbackfoodorder,postbackspeech
     import dialogflow_v2 as dialogflow
 
     # data = request.json
@@ -91,16 +90,39 @@ def handle_incoming_messages():
                             reply(sender_id, foodpage4(ACCESS_TOKEN,sender_id))
                             return 'OK'
 
-                        elif message_text == "View More food page 5":
-                            reply(sender_id, foodpage5(ACCESS_TOKEN,sender_id))
-                            return 'OK'
-
                         elif message_text == "View More drinks page 2":
                             reply(sender_id, drinkspage2(ACCESS_TOKEN,sender_id))
                             return 'OK'
 
+                        elif message_text == "FACEBOOK_WELCOME":
+                            r = requests.post("https://graph.facebook.com/v2.6/me/messages",
+                                              params={"access_token": ACCESS_TOKEN},
+                                              data=json.dumps({
+                                                  "recipient": {
+                                                      "id": sender_id
+                                                  },
+                                                  "message": {
+                                                            "text": "What do you wish to eat today? You can browse our menu with the button below."
+                                                                    " Alternatively, you can tell me the food/beverage that you want, with the quantity behind it. "
+                                                                    "For example, 2 char kway teow and 1 milk tea",
+                                                            "quick_replies": [
+                                                              {
+                                                                "content_type": "text",
+                                                                "title": "Menu",
+                                                                "payload": "Menu"
+                                                              }
+                                                            ]
+                                                          }
+                                              }),
+                                              headers={'Content-type': 'application/json'})
+                            return 'OK'
+                            if r.status_code != requests.codes.ok:
+                                print(r.text)
+
                         else:
-                            postbackfood += ''.join([i for i in message_text if not i.isdigit()])
+                            # postbackfood += ''.join([i for i in message_text if not i.isdigit()])
+                            postbackfood = ""
+                            postbackfood += message_text
                             reply(sender_id, "How many " + postbackfood + " do you wish to order?")
                             return 'OK'
 
@@ -124,7 +146,6 @@ def handle_incoming_messages():
     response = session_client.detect_intent(
         session=session, query_input=query_input)
 
-    # print('=' * 20)
     #     # print('Query text: {}'.format(response.query_result.query_text))
     #     # print('Detected intent: {} (confidence: {})\n'.format(
     #     #     response.query_result.intent.display_name,
@@ -135,7 +156,8 @@ def handle_incoming_messages():
     intentofDF = response.query_result.intent.display_name
     if intentofDF == "Complexquery":
         # speech = complexq(response.query_result.query_text, "needclean")
-        speech = complexq(response.query_result.query_text)
+        speech = cleantext(response.query_result.query_text)
+        speech = complexq(speech)
         result = {
             "fulfillmentText": speech,
             # "source": "facebook",
@@ -168,8 +190,13 @@ def handle_incoming_messages():
 
     elif intentofDF == "Complexquery - yes":
         processedorder = totalprice()
-        # reply(sender, "The total price for your order is $"+str(round(processedorder, 2)))
         reply(sender, str(processedorder))
+        reply(sender, "Thank you for ordering with us! You can collect your food at the counter later with this order number: " + sender[-4:])
+        postbackspeech = ""
+        postbackfoodorder = ""
+        postbackfood = ""
+
+
 
     elif intentofDF == "ask_menu_word":
         menu = "----------------------------"
@@ -395,28 +422,35 @@ def handle_incoming_messages():
 
     elif intentofDF == "postback_order":
         postbackfoodorder = str(int(response.query_result.parameters['number']))
-        print("postbackfoodorder before adding food is: ", postbackfoodorder)
-        postbackfoodorder = postbackfoodorder + " " + postbackfood
+        if postbackfood:
+            postbackfoodorder = postbackfoodorder + " " + postbackfood
+        else:
+            postbackfood = message_text
+            postbackfoodorder = postbackfoodorder + " " + postbackfood
         print("postbackfoodorder before complexq: ", postbackfoodorder)
-        # postbackspeech = complexq(postbackfoodorder,False)
         postbackspeech = complexq(postbackfoodorder)
         reply(sender, postbackspeech)
 
     elif intentofDF == "postback_order - yes":
         processedorder = totalprice()
         reply(sender, str(processedorder))
+        reply(sender, "Thank you for ordering with us! You can collect your food at the counter later with this order number: " + sender[-4:])
         postbackspeech = ""
         postbackfoodorder = ""
         postbackfood = ""
-        session.__del__()
+
 
     elif intentofDF == "postback_order - no":
         reply(sender, "Can you repeat your order to me again? Thanks!")
         postbackspeech = ""
+        postbackspeech = ""
         postbackfoodorder = ""
         postbackfood = ""
 
-    elif message == "Get started":
+
+
+
+    elif message.lower() == "get started":
         r = requests.post("https://graph.facebook.com/v2.6/me/messages",
                           params={"access_token": ACCESS_TOKEN},
                           data=json.dumps({
@@ -439,6 +473,9 @@ def handle_incoming_messages():
                           headers={'Content-type': 'application/json'})
         if r.status_code != requests.codes.ok:
             print(r.text)
+
+    else:
+        reply(sender, response.query_result.fulfillment_text)
 
     return 'OK'
 

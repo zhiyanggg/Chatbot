@@ -22,7 +22,6 @@ bee hoon, 20423792
 spaghetti with chicken cutlet, 20423792 
 bun bo hue, 20423792 
 spaghetti with ham and mushroom, 20423792 
-pho, 20423792 
 mee siam, 20423792 
 dim sum, 20423792 
 wanton mee, 20423792 
@@ -51,12 +50,13 @@ spaghetti, 20423792
 large, 20423792
 regular, 20423792
 small, 20423792
-tiny, 20423792
+teh bing, 20423792
+teh, 20423792
+tea, 20423792
 enormous, 20423792
 medium, 20423792
 extra-large, 20423792
 cubes,1887321
-tea, 20423792
 potato, 20423792
 gao, 20423792
 cups,8935485

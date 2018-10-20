@@ -228,19 +228,19 @@ def foodpage2(accesstoken, sender):
                                               {
                                                   "type": "postback",
                                                   "title": "Order now",
-                                                  "payload": "beef"
+                                                  "payload": "dim sum"
                                               }
                                           ]
                                       },
                                       {
-                                        "title" : "biryani , $ 4.0",
-                                        "image_url" : "http://www.ndtv.com/cooks/images/mutton-biryani-new.jpg",
-                                        "subtitle" : "Biryani, also known as biriyani, biriani, birani or briyani, 'spicy rice' is a South Asian mixed rice dish with its origins among the Muslims of the Indian subcontinent.",
+                                        "title" : "spaghetti with sausage , $ 5.0",
+                                        "image_url" : "https://img.taste.com.au/pSKAAN57/w720-h480-cfill-q80/taste/2016/11/mushroom-and-ham-spaghetti-25701-1.jpeg",
+                                        "subtitle" : "Delicious pieces of ham add a meaty touch to this hearty pasta dish.",
                                         "buttons": [
                                               {
                                                   "type": "postback",
                                                   "title": "Order now",
-                                                  "payload": "dim sum"
+                                                  "payload": "spaghetti with sausage"
                                               }
                                           ]
                                       },
@@ -498,14 +498,14 @@ def foodpage4(accesstoken, sender):
                                           ]
                                       },
                                       {
-                                        "title" : "bee hoon , $ 1.2",
-                                        "image_url" : "https://s3-ap-southeast-1.amazonaws.com/afc-prod/thumbnails/standard_mobile/5415/0286/1193/tn-HFM-Braised-Pig-Trotter-Bee-Hoon.jpg",
-                                        "subtitle" : "Rice vermicelli are a thin form of rice noodles. They are sometimes referred to as rice noodles, rice sticks, or bee hoon, but they should not be confused with cellophane noodles which are a different Asian type of vermicelli made from mung bean starch or",
-                                        "buttons": [
+                                          "title": "spaghetti with ham and mushroom , $ 5.0",
+                                          "image_url": "https://www.simplyrecipes.com/wp-content/uploads/2006/09/italian-sausage-spaghetti-vertical-a-600.jpg",
+                                          "subtitle": "Quick and easy spaghetti recipe with Italian sausage. The tomato-based sauce gets its seasoning from the sweet and spicy sausages. Our favorite way to make spaghetti!",
+                                          "buttons": [
                                               {
                                                   "type": "postback",
                                                   "title": "Order now",
-                                                  "payload": "bee hoon"
+                                                  "payload": "spaghetti with ham and mushroom"
                                               }
                                           ]
                                       },
@@ -522,7 +522,7 @@ def foodpage4(accesstoken, sender):
                                           ]
                                       },
                                       {
-                                        "title" : "satay , $ 3.0",
+                                        "title" : "satay , $ 0.5",
                                         "image_url" : "https://www.irishtimes.com/polopoly_fs/1.2854640.1478261927!/image/image.jpg_gen/derivatives/landscape_620/image.jpg",
                                         "subtitle" : "Satay, or sate in Indonesian spelling, is a dish of seasoned, skewered and grilled meat, served with a sauce.",
                                         "buttons": [
@@ -577,52 +577,6 @@ def foodpage4(accesstoken, sender):
     if r.status_code != requests.codes.ok:
         print(r.text)
 
-def foodpage5(accesstoken, sender):
-    ACCESS_TOKEN = accesstoken
-    r = requests.post("https://graph.facebook.com/v2.6/me/messages",
-                  params={"access_token": ACCESS_TOKEN},
-                  data=json.dumps({
-                      "recipient": {
-                          "id": sender
-                      },
-                      "message": {
-                          "attachment": {
-                              "type": "template",
-                              "payload": {
-                                  "template_type": "generic",
-                                  "elements": [
-                                      {
-                                          "title": "spaghetti with ham and mushroom , $ 5.0",
-                                          "image_url": "https://www.simplyrecipes.com/wp-content/uploads/2006/09/italian-sausage-spaghetti-vertical-a-600.jpg",
-                                          "subtitle": "Quick and easy spaghetti recipe with Italian sausage. The tomato-based sauce gets its seasoning from the sweet and spicy sausages. Our favorite way to make spaghetti!",
-                                          "buttons": [
-                                              {
-                                                  "type": "postback",
-                                                  "title": "Order now",
-                                                  "payload": "spaghetti with ham and mushroom"
-                                              }
-                                          ]
-                                      },
-                                      {
-                                        "title" : "spaghetti with sausage , $ 5.0",
-                                        "image_url" : "https://img.taste.com.au/pSKAAN57/w720-h480-cfill-q80/taste/2016/11/mushroom-and-ham-spaghetti-25701-1.jpeg",
-                                        "subtitle" : "Delicious pieces of ham add a meaty touch to this hearty pasta dish.",
-                                        "buttons": [
-                                              {
-                                                  "type": "postback",
-                                                  "title": "Order now",
-                                                  "payload": "spaghetti with sausage"
-                                              }
-                                          ]
-                                      }
-                                  ]
-                              }
-                          }
-                      }
-                  }),
-                  headers={'Content-type': 'application/json'})
-    if r.status_code != requests.codes.ok:
-        print(r.text)
 
 def drinkspage1(accesstoken, sender):
     ACCESS_TOKEN = accesstoken
@@ -927,7 +881,7 @@ def sidespage1(accesstoken, sender):
                                           ]
                                       },
                                       {
-                                        "title" : "toast cube , $ 1.8",
+                                        "title" : "toast cube , $ 1.5",
                                         "image_url" : "https://www.recipetineats.com/wp-content/uploads/2015/03/Cinnamon-Sugar-French-Toast-Bites-1.jpg",
                                         "subtitle" : "Cube toast is a dessert dish that consists of brioche cooked as French toast formed in an upright position that is filled with foods such as vanilla ice cream, granola, mochi, Pocky candy, cubed pieces.",
                                         "buttons": [

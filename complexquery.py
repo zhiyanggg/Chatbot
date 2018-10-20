@@ -20,9 +20,8 @@ config = {
     'host': 'us-cdbr-iron-east-01.cleardb.net',
     'database': 'heroku_b719ec770e665f0',
     'raise_on_warnings': True,
-	'connection_timeout': 1800,
+	'connect_timeout': 1800,
 }
-totalresponse = ""
 
 nlp = spacy.load("/app/en_core_web_sm")
 print("loaded en_core_web_sm model succeeded")
@@ -71,18 +70,31 @@ def cleantext(s):   # remove stop words, multiple spaces, special characters and
     document = nlp(s)
     print("created doc for en model")
 
+    s = ""
+
+    for token in document:
+        if token.text == "fries":
+            s += token.text
+            s += " "
+        else:
+            s += token.lemma_
+            s += " "
+
     # for ent in document.ents:
     #     print(ent.text, ent.label_)
 
-            # ent.text = str(numbers[ent.text])
-    s = ' '.join([token.lemma_ for token in document])
     print(s)# after lemmatization
     newstring = ""
     for word in s.split():
-        if word == "fry" or word =="frys":
+        if word == "frys":
             word = "fries"
+
+        elif word == "fry":
+            word = "fried"
+
         newstring += word
         newstring += " "
+
     s = newstring
     print(newstring)# after attempt
     s = ' '.join([word for word in s.split() if word not in cachedStopWords])
@@ -208,17 +220,17 @@ def trainnewmodel(model=None, new_model_name='food', output_dir="/app", n_iter=2
 
 
 def complexq(query_text):
-    test_text2 = query_text
-    # if clean == "needclean":
-    test_text2 = cleantext(test_text2)
-    print(test_text2)
-    doc4 = nlp1(test_text2)
+    doc4 = nlp1(query_text)
     print("created doc for food model")
     result = "You wish to order "
     quantity = []
     count = 0
     totalcount = len(doc4.ents)
     global foodordered, drinksordered, sidesordered
+    foodordered.clear()
+    drinksordered.clear()
+    sidesordered.clear()
+
     for ent in doc4.ents:
         if count == totalcount-3 and count != 0 and ent.label_ == "QUANTITY":
             result += " and "
@@ -318,7 +330,7 @@ def complexq(query_text):
 
 
 def totalprice():
-    global totalresponse
+    totalresponse = ""
     total = float(0)
     if not cnx.is_connected():
         connecttomysql()
@@ -341,8 +353,7 @@ def totalprice():
             sidesprice = float(sidesordered[i-1]) * result[1]
             sidesname = result[0]
             total += sidesprice
-            # totalresponse += ("The price of the " + sidesname + " is $" + str(round(sidesprice, 2)))
-            totalresponse += (sidesname + " X " + str(int(sidesordered[i-1])) + " = $" + str(round(sidesprice, 2)))
+            totalresponse += (sidesname + " ($" + str(float(result[1])) + ") " + " X " + str(int(sidesordered[i-1])) + " = $" + str(round(sidesprice, 2)))
             totalresponse += "\u000A"
 
 
@@ -364,8 +375,7 @@ def totalprice():
             drinksprice = float(drinksordered[i-1]) * result[1]
             drinksname = result[0]
             total += drinksprice
-            # totalresponse += ("The price of the " + drinksname + " is $" + str(round(drinksprice, 2)))
-            totalresponse += (drinksname + " X " + str(int(drinksordered[i-1])) + " = $" + str(round(drinksprice, 2)))
+            totalresponse += (drinksname + " ($" + str(float(result[1])) + ") " + " X " + str(int(drinksordered[i-1])) + " = $" + str(round(drinksprice, 2)))
             totalresponse += "\u000A"
 
     for i in range(len(foodordered)):
@@ -386,8 +396,7 @@ def totalprice():
             foodprice = float(foodordered[i-1]) * result[1]
             foodname = result[0]
             total += foodprice
-            # totalresponse += ("The price of the " + foodname + " is $" + str(round(foodprice, 2)))
-            totalresponse += (foodname + " X " + str(int(foodordered[i-1])) + " = $" + str(round(foodprice, 2)))
+            totalresponse += (foodname + " ($" + str(float(result[1])) + ") " + " X " + str(int(foodordered[i-1])) + " = $" + str(round(foodprice, 2)))
             totalresponse += "\u000A"
 
 

@@ -65,8 +65,6 @@ def cleantext(s):   # remove stop words, multiple spaces, special characters and
 
     print("this is newstring ", s)
     s = spellingchecker(s)
-    # nlp = ('en_core_web_md')
-    # nlp.remove_pipe('parser')
     document = nlp(s)
     print("created doc for en model")
 
@@ -80,10 +78,7 @@ def cleantext(s):   # remove stop words, multiple spaces, special characters and
             s += token.lemma_
             s += " "
 
-    # for ent in document.ents:
-    #     print(ent.text, ent.label_)
-
-    print(s)# after lemmatization
+    print("After lemmatization: ",s)# after lemmatization
     newstring = ""
     for word in s.split():
         if word == "frys":
@@ -92,24 +87,21 @@ def cleantext(s):   # remove stop words, multiple spaces, special characters and
         elif word == "fry":
             word = "fried"
 
+        elif word == "chickwen":
+            word = "chicken"
+
         newstring += word
         newstring += " "
 
     s = newstring
-    print(newstring)# after attempt
+    print("New String after checking for fries: ", newstring)# after attempt
     s = ' '.join([word for word in s.split() if word not in cachedStopWords])
-    print(s)# after removing stopwords
+    print("After removing stopwords: ", s)# after removing stopwords
     return s
 
 # test_text2 = 'i want 3 sticks of satay, 4 fries and 3 cups of coffee'
 # test_text1 = 'i want 3 sticks of satay,!@# 4 biryani， 5 pasta,$%^&*()_ 6                   oyster omelette'
 # print(cleantext(test_text2))
-
-# training data
-# Note: If you're using an existing model, make sure to mix in examples of
-# other entity types that spaCy correctly recognized before. Otherwise, your
-# model might learn the new type, but "forget" what it previously knew.
-# https://explosion.ai/blog/pseudo-rehearsal-catastrophic-forgetting
 
 TRAIN_DATA = foodtraining()
 # print(TRAIN_DATA)
@@ -177,7 +169,7 @@ def trainnewmodel(model=None, new_model_name='food', output_dir="/app", n_iter=2
 
 
     # # test the saved model
-    # Uncomment the following section below if you wish to deploy this script on Dialogflow
+    # Uncomment the following section below if you wish to test the performance of this script using Spacy_server_api.py
     ## This is the start of the section that contains testing samples
     # print("initiating timer for test cases")
     # start1 = time.time()
@@ -261,13 +253,6 @@ def complexq(query_text):
                     continue
 
             else:
-                # print("Please input the quantity for your food,", ent.text, ": ")
-                # quantityoffood = input()
-                # foodordered.append(quantityoffood)
-                # foodordered.append(ent.text)
-                # result += ent.text
-                # # result += ", "
-                # count = count + 1
                 continue
 
         if (ent.label_) == "DRINKS":
@@ -284,13 +269,6 @@ def complexq(query_text):
                     continue
 
             else:
-                # print("Please input the quantity for your drinks,", ent.text, ": ")
-                # quantityofdrinks = input()
-                # drinksordered.append(quantityofdrinks)
-                # drinksordered.append(ent.text)
-                # result += ent.text
-                # # result += ", "
-                # count = count + 1
                 continue
 
         if (ent.label_) == "SIDES":
@@ -307,25 +285,14 @@ def complexq(query_text):
                     continue
 
             else:
-                # print("Please input the quantity for your sides,", ent.text, ": ")
-                # quantityofsides = input()
-                # sidesordered.append(quantityofsides)
-                # sidesordered.append(ent.text)
-                # result += ent.text
-                # # result += ", "
-                # count = count + 1
                 continue
 
 
         else:
-        #     result += ent.text
-        #     result += ", "
-        #     count = count + 1
              continue
 
 
     print('Entities', [(ent.text, ent.label_) for ent in doc4.ents])
-    # result = (spacy_client.testfunc(doc4))
     return result
 
 
@@ -467,6 +434,3 @@ def fooddetails(s):
         print(col)
         fooddetailslist.append(col)
     return fooddetailslist
-
-# if __name__ == '__main__':
-#     plac.call(main)

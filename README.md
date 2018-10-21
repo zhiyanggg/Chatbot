@@ -4,7 +4,7 @@ Foodchatbot for NTU NorthSpine Canteen A
 
 ## Getting Started
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system. 
+These instructions will get you a copy of the project up and running on a live cloud system. Should you wish to test the project on your local machine for development, You can navigate to the "TestingModelLocally" branch to clone the repository. 
 
 ### A.1 Install Python 3 
 You may install the latest Python 3 version from Python’s download page (https://www.python.org/downloads/). The Python package manager pip is included in Python 3.4 and above by default. The python version used for development in this project is version 3.6.4. The application will work perfectly fine with the latest version of python from the download page.

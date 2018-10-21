@@ -106,9 +106,10 @@ git commit -m “first commit”
 ```
 
 Lastly, to deploy the app to Heroku, we can push the code from the local repository’s master branch to your Heroku remote with the command below.
+
 ```
 git push heroku master
- ```
+```
 
 ### Authors
 

@@ -18,10 +18,11 @@ Flask-SQLAlchemy==1.0
 Jinja2==2.7.1
 MarkupSafe==1.0
 SQLAlchemy==1.2.1
-Flask==0.12.2
+Flask==0.12.3
 Flask-Cors==3.0.3          
 Werkzeug==0.11.11      
 pymessenger==0.0.7.0
 requests==2.10.0
 apiai==1.2.3
 dialogflow==0.5.1
+fbmq==2.5.0

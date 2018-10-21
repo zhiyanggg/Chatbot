@@ -110,6 +110,6 @@ Lastly, to deploy the app to Heroku, we can push the code from the local reposit
 git push heroku master
  ```
 
-## Authors
+### Authors
 
 * **Lim Zhi Yang** 
